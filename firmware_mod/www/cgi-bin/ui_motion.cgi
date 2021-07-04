@@ -25,6 +25,7 @@ if [ -n "$F_cmd" ]; then
     echo "motionTimeout#:#${motion_timeout}"
     echo "motionTracking#:#${motion_tracking}"
     echo "saveSnapshot#:#${save_snapshot}"
+    echo "saveVideo#:#${save_video}"
     echo "maxSnaphotDays#:#${max_snapshot_days}"
     echo "maxVideoDays#:#${max_video_days}"
     echo "ftpSnapshot#:#${ftp_snapshot}"
@@ -35,6 +36,11 @@ if [ -n "$F_cmd" ]; then
     echo "ftpPassword#:#${ftp_password}"
     echo "ftpStillsDir#:#${ftp_stills_dir}"
     echo "ftpVideosDir#:#${ftp_videos_dir}"
+    echo "dropboxStillsDir#:#${dropbox_stills_dir}"
+    echo "dropboxVideosDir#:#${dropbox_videos_dir}"
+    echo "dropboxSnapshot#:#${dropbox_snapshot}"
+    echo "dropboxVideo#:#${dropbox_video}"
+    echo "dropboxToken#:#${dropbox_token}"
     echo "smbSnapshot#:#${smb_snapshot}"
     echo "smbVideo#:#${smb_video}"
     echo "smbShare#:#${smb_share}"
@@ -50,7 +56,8 @@ if [ -n "$F_cmd" ]; then
     echo "sendTelegram#:#${send_telegram}"
     echo "telegramAlertType#:#${telegram_alert_type}"
     echo "sendMatrix#:#${send_matrix}"
-    
+    echo "nightModeEventDelay#:#${night_mode_event_delay}"
+
 	;;
   save_config)
     if [ -n "${F_motionDetection+x}" ]; then
@@ -73,7 +80,7 @@ if [ -n "$F_cmd" ]; then
         echo -n "Motion color indicator set to "
         echo -n $(echo $color | cut -d ' ' -f $(($F_motionIndicatorColor + 1)))
 		    echo "<br />"
-      fi 
+      fi
 	  fi
     if [ -n "${F_motionTracking+x}" ]; then
 		F_motionTracking=$(printf '%b' "${F_motionTracking//%/\\x}")
@@ -85,15 +92,15 @@ if [ -n "$F_cmd" ]; then
 	    rewrite_config /system/sdcard/config/motion.conf motion_timeout $F_motionTimeout
 		  echo "Motion timeout set to $F_motionTimeout<br/>"
 	  fi
-    if [ -n "${F_saveSnaphot+x}" ]; then
-		F_saveSnaphot=$(printf '%b' "${F_saveSnaphot//%/\\x}")
-	    rewrite_config /system/sdcard/config/motion.conf save_snapshot $F_saveSnaphot
-		  echo "Save snapshot set to $F_saveSnaphot<br/>"
+    if [ -n "${F_saveSnapshot+x}" ]; then
+		F_saveSnapshot=$(printf '%b' "${F_saveSnapshot//%/\\x}")
+	    rewrite_config /system/sdcard/config/motion.conf save_snapshot $F_saveSnapshot
+		  echo "Save snapshot set to $F_saveSnapshot<br/>"
 	  fi
     if [ -n "${F_maxSnaphotDays+x}" ]; then
 		F_maxSnaphotDays=$(printf '%b' "${F_maxSnaphotDays//%/\\x}")
 	    rewrite_config /system/sdcard/config/motion.conf max_snapshot_days $F_maxSnaphotDays
-		  echo "Maximun snapshot retention in days set to $F_maxSnaphotDays<br/>"
+		  echo "Maximum snapshot retention in days set to $F_maxSnaphotDays<br/>"
 	  fi
     if [ -n "${F_saveVideo+x}" ]; then
 		F_saveVideo=$(printf '%b' "${F_saveVideo//%/\\x}")
@@ -103,7 +110,7 @@ if [ -n "$F_cmd" ]; then
     if [ -n "${F_maxVideoDays+x}" ]; then
 		F_maxVideoDays=$(printf '%b' "${F_maxVideoDays//%/\\x}")
 	    rewrite_config /system/sdcard/config/motion.conf max_video_days $F_maxVideoDays
-		  echo "Maximun video retention in days set to $F_maxVideoDays<br/>"
+		  echo "Maximum video retention in days set to $F_maxVideoDays<br/>"
 	  fi
         if [ -n "${F_smbSnapshot+x}" ]; then
 		 F_smbSnapshot=$(printf '%b' "${F_smbSnapshot//%/\\x}")
@@ -180,6 +187,31 @@ if [ -n "$F_cmd" ]; then
 	    rewrite_config /system/sdcard/config/motion.conf ftp_videos_dir "\"$F_ftpVideosDir\""
 		echo "FTP videos directory set to $F_ftpVideosDir<br/>"
 	  fi
+    if [ -n "${F_dropboxSnapshot+x}" ]; then
+		F_dropboxSnapshot=$(printf '%b' "${F_dropboxSnapshot//%/\\x}")
+	    rewrite_config /system/sdcard/config/motion.conf dropbox_snapshot  $F_dropboxSnapshot
+		  echo "Save snapshot to dropbox set to  set to $F_dropboxSnapshot<br/>"
+	  fi
+    if [ -n "${F_dropboxVideo+x}" ]; then
+		F_dropboxVideo=$(printf '%b' "${F_dropboxVideo//%/\\x}")
+	    rewrite_config /system/sdcard/config/motion.conf dropbox_video $F_dropboxVideo
+		  echo "Save video to dropbox set to $F_dropboxVideo<br/>"
+	  fi
+    if [ -n "${F_dropboxToken+x}" ]; then
+		  F_dropboxToken=$(printf '%b' "${F_dropboxToken//%/\\x}" | sed 's/\//\\\//g')
+	      rewrite_config /system/sdcard/config/motion.conf dropbox_token "\"$F_dropboxToken\""
+		  echo "dropbox token set<br/>"
+	  fi
+    if [ -n "${F_dropboxStillsDir+x}" ]; then
+		F_dropboxStillsDir=$(printf '%b' "${F_dropboxStillsDir//%/\\x}"  | sed 's/\//\\\//g')
+		rewrite_config /system/sdcard/config/motion.conf dropbox_stills_dir "\"$F_dropboxStillsDir\""
+		echo "dropbox snapshots directory set to $F_dropboxStillsDir<br/>"
+	  fi
+    if [ -n "${F_dropboxVideosDir+x}" ]; then
+		F_dropboxVideosDir=$(printf '%b' "${F_dropboxVideosDir//%/\\x}"  | sed 's/\//\\\//g')
+		rewrite_config /system/sdcard/config/motion.conf dropbox_videos_dir "\"$F_dropboxVideosDir\""
+		echo "dropbox videos directory set to $F_dropboxVideosDir<br/>"
+	  fi
     if [ -n "${F_motionTriggerLed+x}" ]; then
 		F_motionTriggerLed=$(printf '%b' "${F_motionTriggerLed//%/\\x}")
 	    rewrite_config /system/sdcard/config/motion.conf motion_trigger_led $F_motionTriggerLed
@@ -220,6 +252,11 @@ if [ -n "$F_cmd" ]; then
 	    rewrite_config /system/sdcard/config/motion.conf send_matrix $F_sendMatrix
 		  echo "Send Matrix on motion set to $F_sendMatrix<br/>"
 	  fi
+    if [ -n "${F_nightModeEventDelay+x}" ]; then
+  		F_nightModeEventDelay=$(printf '%b' "${F_nightModeEventDelay//%/\\x}")
+	    rewrite_config /system/sdcard/config/motion.conf night_mode_event_delay $F_nightModeEventDelay
+		  echo "Motion night mode delay set to $F_nightModeEventDelay<br/>"
+	  fi
     if [ -n "${F_regions+x}" ]; then
 	  F_regions=$(printf '%b' "${F_regions//%/\\x}")
 	    rewrite_config /system/sdcard/config/motion.conf region_of_interest $F_regions
@@ -239,4 +276,3 @@ if [ -n "$F_cmd" ]; then
   fi
 
 exit 0
-
